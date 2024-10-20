@@ -12,16 +12,3 @@
 	<Button href="/listings">I want new stuff!</Button>
 	<Button href="/listings/new">I want to get rid of stuff...</Button>
 </div>
-
-<!--
-This should probably be the main page, including search
-1. Page should prompt anon users to get started by signing up
-2. Should have category examples
-3. Should have search
--->
-
-<style lang="postcss">
-	:global(html) {
-		background-color: theme(colors.gray.100);
-	}
-</style>
