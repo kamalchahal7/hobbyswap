@@ -1,6 +1,27 @@
 <script lang="ts">
+	import axios from 'axios';
 	import { Button, Checkbox, A } from 'flowbite-svelte';
+
+	import { type SignupDto } from '$lib/types/app.d';
 	import InputField from '$lib/components/InputField.svelte';
+
+	async function signUp(e: MouseEvent) {
+		e.preventDefault();
+		const data: SignupDto = {
+			first_name: firstName,
+			last_name: lastName,
+			date_of_birth: dateOfBirth,
+			email,
+			password,
+			confirmation: confirmPassword
+		};
+		try {
+			const response = await axios.post('http://localhost:5000/register', data);
+			// const userData: LoginResponse = response.data;
+		} catch (err) {
+			console.error(err);
+		}
+	}
 
 	let firstName: string;
 	let lastName: string;
@@ -9,8 +30,6 @@
 	let agreement: boolean = false;
 	let password: string;
 	let confirmPassword: string;
-
-	$: console.log(firstName, lastName, email, dateOfBirth, agreement, password, confirmPassword);
 </script>
 
 <h1 class="text-3xl mb-4">Hey There!</h1>
@@ -77,5 +96,5 @@
 			privacy policy
 		</A>.
 	</Checkbox>
-	<Button type="submit">Submit</Button>
+	<Button type="submit" on:click={signUp}>Submit</Button>
 </form>
