@@ -44,110 +44,114 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Login Route"""
-    if request.is_json:
-        # error checking for received json data
-        data = request.get_json()
-        if data is None:
-            return jsonify({"error": "Invalid JSON"}), 400
 
-        # error checking for identifier
-        email = data.get("email")
-        if not email:
-            return jsonify({"error": "Email is missing"}), 400
-
-        # error checking for password
-        password = data.get("password")
-        if not password:
-            return jsonify({"error", "Password missing."}), 400
-
-        # error checking for queried account
-        account = db.execute(
-            "SELECT * FROM users WHERE email = ?",
-            email,
-        )
-        if not account:
-            return jsonify({"error": "Email is not registered."}), 400
-
-        # error checking
-        if len(account) != 1 or not check_password_hash(
-            account[0]["password_hash"], password
-        ):
-            return jsonify({"error": "Pasword is incorrect."}), 400
-
-        # intializes user_id into the session
-        session["user_id"] = account[0]["id"]
-
-        return jsonify(
-            {
-                "message": "Login successful!",
-                "user_id": session["user_id"],
-                "first_name": account[0]["first_name"],
-                "last_name": account[0]["last_name"],
-                "email": account[0]["email"],
-            }
-        )
-    else:
+    # error checking for received data
+    if not request.is_json:
         return jsonify({"error": "Content type is not supported."}), 415
+
+    # error checking for received json data
+    data = request.get_json()
+    if data is None:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    # error checking for identifier
+    email = data.get("email")
+    if not email:
+        return jsonify({"error": "Email is missing"}), 400
+
+    # error checking for password
+    password = data.get("password")
+    if not password:
+        return jsonify({"error", "Password missing."}), 400
+
+    # error checking for queried account
+    account = db.execute(
+        "SELECT * FROM users WHERE email = ?",
+        email,
+    )
+    if not account:
+        return jsonify({"error": "Email is not registered."}), 400
+
+    # error checking
+    if len(account) != 1 or not check_password_hash(
+        account[0]["password_hash"], password
+    ):
+        return jsonify({"error": "Pasword is incorrect."}), 400
+
+    # intializes user_id into the session
+    session["user_id"] = account[0]["id"]
+
+    return jsonify(
+        {
+            "message": "Login successful!",
+            "user_id": session["user_id"],
+            "first_name": account[0]["first_name"],
+            "last_name": account[0]["last_name"],
+            "email": account[0]["email"],
+        }
+    )
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Registration Route"""
-    if request.is_json:
-        # error checking for received json data
-        data = request.get_json()
-        if data is None:
-            return jsonify({"error": "Invalid JSON"}), 400
 
-        # error checking for incomplete name fields
-        first_name = data.get("first_name")
-        last_name = data.get("last_name")
-        if not first_name or not last_name:
-            return jsonify({"error": "Full name not provided."}), 400
+    # error checking for received data
+    if not request.is_json:
+        return jsonify({"error": "Content type is not supported."}), 415
 
-        # error checking for birthdate
-        date_of_birth = data.get("date_of_birth")
-        if not date_of_birth:
-            return jsonify({"error": "Date of birth not provided."}), 400
+    # error checking for received json data
+    data = request.get_json()
+    if data is None:
+        return jsonify({"error": "Invalid JSON"}), 400
 
-        # error checking for email
-        email = data.get("email")
-        if not email:
-            return jsonify({"error": "Email not provided."}), 400
-        if not re.match(pattern, email):
-            return jsonify({"error": "Not a valid email."}), 400
-        existing_emails = db.execute("SELECT email FROM users WHERE email = ?", email)
-        if len(existing_emails) > 0:
-            return jsonify({"error": "Email already registered."}), 400
+    # error checking for incomplete name fields
+    first_name = data.get("first_name")
+    last_name = data.get("last_name")
+    if not first_name or not last_name:
+        return jsonify({"error": "Full name not provided."}), 400
 
-        # error checking for password
-        password = data.get("password")
-        if not password:
-            return jsonify({"error": "Password missing."}), 400
+    # error checking for birthdate
+    date_of_birth = data.get("date_of_birth")
+    if not date_of_birth:
+        return jsonify({"error": "Date of birth not provided."}), 400
 
-        # error checking for confirmation
-        confirmation = data.get("confirmation")
-        if not confirmation:
-            return jsonify({"error": "Confirmation missing."}), 400
-        if not confirmation == password:
-            return jsonify({"error": "Confirmation does not match password."}), 400
+    # error checking for email
+    email = data.get("email")
+    if not email:
+        return jsonify({"error": "Email not provided."}), 400
+    if not re.match(pattern, email):
+        return jsonify({"error": "Not a valid email."}), 400
+    existing_emails = db.execute("SELECT email FROM users WHERE email = ?", email)
+    if len(existing_emails) > 0:
+        return jsonify({"error": "Email already registered."}), 400
 
-        # generate password hash
-        password = generate_password_hash(password)
+    # error checking for password
+    password = data.get("password")
+    if not password:
+        return jsonify({"error": "Password missing."}), 400
 
-        db.execute(
-            """INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth)
-                    VALUES (?, ?, ?, ?, ?)""",
-            email,
-            password,
-            first_name,
-            last_name,
-            date_of_birth,
-        )
+    # error checking for confirmation
+    confirmation = data.get("confirmation")
+    if not confirmation:
+        return jsonify({"error": "Confirmation missing."}), 400
+    if not confirmation == password:
+        return jsonify({"error": "Confirmation does not match password."}), 400
 
-        return jsonify({"message": "Registration successful!"})
-    else:
-        return jsonify("Content type is not supported."), 415
+    # generate password hash
+    password = generate_password_hash(password)
+
+    db.execute(
+        """INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth)
+                VALUES (?, ?, ?, ?, ?)""",
+        email,
+        password,
+        first_name,
+        last_name,
+        date_of_birth,
+    )
+
+    return jsonify({"message": "Registration successful!"})
 
 
 @app.route("/logout")
