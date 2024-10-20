@@ -1,0 +1,12 @@
+[project]
+name = "hobbyswap"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "cs50>=9.4.0",
+    "flask-cors>=5.0.0",
+    "flask-session>=0.8.0",
+    "flask>=3.0.3",
+    "pytz>=2024.2",
+]
