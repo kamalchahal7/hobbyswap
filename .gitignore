@@ -1,4 +1,5 @@
 users.db
+app.db
 __pycache__
 .venv
 flask_session

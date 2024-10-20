@@ -15,6 +15,10 @@
 	} from 'flowbite-svelte';
 
 	import { page } from '$app/stores';
+	import { useUser } from '$lib/hooks/use-user';
+
+	const user = useUser();
+
 	$: activeUrl = $page.url.pathname;
 </script>
 
@@ -27,11 +31,17 @@
 			</span>
 		</NavBrand>
 		<div class="flex items-center md:order-2">
-			<Button class="me-3" href="/listings/new" size="sm">
-				+
-				<span class="hidden md:inline"> &nbsp;New Listing </span>
-			</Button>
-			<Avatar id="avatar-menu" />
+			{#if $user}
+				<Button class="me-3" href="/listings/new" size="sm">
+					+
+					<span class="hidden md:inline"> &nbsp;New Listing </span>
+				</Button>
+				<Avatar id="avatar-menu" />
+			{:else}
+				<Button class="me-3" href="/auth/login" size="sm" outline>Login</Button>
+				<Button class="me-3" href="/auth/signup" size="sm">Get Started</Button>
+			{/if}
+
 			<NavHamburger />
 			<!-- classMenu={{
 				class: 'w-full md:flex md:w-auto md:order-1'
