@@ -37,6 +37,16 @@
 					<span class="hidden md:inline"> &nbsp;New Listing </span>
 				</Button>
 				<Avatar id="avatar-menu" />
+
+				<Dropdown placement="bottom" triggeredBy="#avatar-menu">
+					<DropdownHeader>
+						<span class="block text-sm">{$user.firstName} {$user.lastName}</span>
+						<span class="block truncate text-sm font-medium">{$user.email}</span>
+					</DropdownHeader>
+					<DropdownItem>Settings</DropdownItem>
+					<DropdownDivider />
+					<DropdownItem>Sign out</DropdownItem>
+				</Dropdown>
 			{:else}
 				<Button class="me-3" href="/auth/login" size="sm" outline>Login</Button>
 				<Button class="me-3" href="/auth/signup" size="sm">Get Started</Button>
@@ -47,15 +57,6 @@
 				class: 'w-full md:flex md:w-auto md:order-1'
 			}} -->
 		</div>
-		<Dropdown placement="bottom" triggeredBy="#avatar-menu">
-			<DropdownHeader>
-				<span class="block text-sm">Bonnie Green</span>
-				<span class="block truncate text-sm font-medium">name@flowbite.com</span>
-			</DropdownHeader>
-			<DropdownItem>Settings</DropdownItem>
-			<DropdownDivider />
-			<DropdownItem>Sign out</DropdownItem>
-		</Dropdown>
 		<NavUl {activeUrl}>
 			<NavLi href="/">Home</NavLi>
 			<NavLi class="cursor-pointer">

@@ -1,25 +1,23 @@
 <script lang="ts">
-	import axios from 'axios';
 	import { Button, Checkbox, A, Toast } from 'flowbite-svelte';
 
-	import { type SignupDto } from '$lib/types/app.d';
-	import InputField from '$lib/components/InputField.svelte';
 	import { goto } from '$app/navigation';
+	import InputField from '$lib/components/InputField.svelte';
+	import authService from '$lib/services/auth-service';
 
 	let registered = false;
 
 	async function signUp(e: MouseEvent) {
 		e.preventDefault();
-		const data: SignupDto = {
-			first_name: firstName,
-			last_name: lastName,
-			date_of_birth: dateOfBirth,
-			email,
-			password,
-			confirmation: confirmPassword
-		};
 		try {
-			await axios.post('http://localhost:5000/register', data);
+			await authService.signUp({
+				first_name: firstName,
+				last_name: lastName,
+				date_of_birth: dateOfBirth,
+				email,
+				password,
+				confirmation: confirmPassword
+			});
 			registered = true;
 			setTimeout(() => {
 				goto('/login');

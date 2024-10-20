@@ -6,21 +6,17 @@
 	import { type User, type LoginDto } from '$lib/types/app.d';
 	import InputField from '$lib/components/InputField.svelte';
 	import { useUser } from '$lib/hooks/use-user';
+	import authService from '$lib/services/auth-service';
 
 	const user = useUser();
 
 	async function login(e: MouseEvent) {
 		e.preventDefault();
-		const data: LoginDto = {
-			email,
-			password
-		};
 		try {
-			const response = await axios.post('http://localhost:5000/login', data, {
-				withCredentials: true
+			$user = await authService.login({
+				email,
+				password
 			});
-			const userData: User = response.data;
-			$user = userData;
 			await goto('/');
 		} catch (err) {
 			console.error(err);

@@ -17,6 +17,36 @@ export interface User {
 	lastName: string;
 }
 
+export interface Tag {
+	value: string;
+	categories?: Category[];
+}
+
+export interface Category {
+	title: string;
+	tags?: Tag[];
+}
+
+export interface Listing {
+	id: number;
+	title: string;
+	description: string;
+	condition: string;
+	datePosted: DateTime;
+	categories: Category[];
+	tags: Tag[];
+	owner: User;
+	comments: Comment[];
+}
+
+export interface Comment {
+	id: number;
+	text: string;
+	owner: User;
+	listing: Listing;
+	replyTo: Comment;
+}
+
 export interface UserDto {
 	email: string;
 	first_name: string;
