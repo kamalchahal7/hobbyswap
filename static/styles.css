@@ -1,0 +1,8 @@
+#navbar {
+    display: flex;
+    align-items: center;  /* Vertically centers the content within the navbar */
+}
+
+#navbar ul {
+    margin: 0;  /* Remove default margin to ensure better centering */
+}
