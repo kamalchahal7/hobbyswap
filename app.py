@@ -1,6 +1,6 @@
 from flask_cors import CORS
 from cs50 import SQL
-from flask import Flask, redirect, render_template, request, session, url_for
+from flask import Flask, redirect, render_template, request, session, url_for, jsonify
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from functions import login_required
@@ -37,138 +37,116 @@ def after_request(response):
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    if request.method == "GET":
-        return render_template("home.html")
+    """ Home Route """
+    return jsonify({"message": "Welcome to the home page!"})
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "GET":
-        return render_template("login.html")
-    else:
+    """ Login Route """
+    if request.is_json:
+        # error checking for received json data
+        data = request.get_json()
+        if data is None:
+            return jsonify({"error": "Invalid JSON"}), 400
+        
         # error checking for identifier
-        identifier = request.form.get("identifier")
-        if not identifier:
-            mssg = "Username/Email is missing"
-            return redirect(url_for("error", error=mssg))
+        email = data.get("email")
+        if not email:
+            return jsonify({"error": "Email is missing"}), 400
 
         # error checking for password
-        password = request.form.get("password")
+        password = data.get("password")
         if not password:
-            mssg = "Password missing."
-            return redirect(url_for("error", error=mssg))
+            return jsonify({"error", "Password missing."}), 400
 
         # error checking for queried account
         account = db.execute(
-            "SELECT * FROM users WHERE username = ? OR email = ?",
-            identifier,
-            identifier,
+            "SELECT * FROM users WHERE email = ?",
+            email,
         )
         if not account:
-            mssg = "Username/Email is not registered."
-            return redirect(url_for("error", error=mssg))
+            return jsonify({"error", "Email is not registered."}), 400
 
         # error checking
         if len(account) != 1 or not check_password_hash(
             account[0]["password_hash"], password
         ):
-            mssg = "Pasword is incorrect."
-            return redirect(url_for("error", error=mssg))
+            return jsonify({"error", "Pasword is incorrect."}), 400
 
         # intializes user_id into the session
         session["user_id"] = account[0]["id"]
 
-        # redirects to home
-        return redirect("/")
+        return jsonify({"message": "Login successful!", "user_id": session["user_id"]})
+    else:
+        return jsonify("Content type is not supported."), 415
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == "GET":
-        return render_template("register.html")
-    else:
+    """ Registration Route """
+    if request.is_json:
+        # error checking for received json data
+        data = request.get_json()
+        if data is None:
+            return jsonify({"error": "Invalid JSON"}), 400
+        
         # error checking for incomplete name fields
-        first_name = request.form.get("first_name")
-        last_name = request.form.get("last_name")
+        first_name = data.get("first_name")
+        last_name = data.get("last_name")
         if not first_name or not last_name:
-            mssg = "Full name not provided."
-            return redirect(url_for("error", error=mssg))
+            return jsonify({"error", "Full name not provided."}), 400
 
         # error checking for birthdate
-        date_of_birth = request.form.get("date_of_birth")
+        date_of_birth = data.get("date_of_birth")
         if not date_of_birth:
-            mssg = "Date of birth not provided."
-            return redirect(url_for("error", error=mssg))
+            return jsonify({"error", "Date of birth not provided."}), 400
 
         # error checking for email
-        email = request.form.get("email")
+        email = data.get("email")
         if not email:
-            mssg = "Email not provided."
-            return redirect(url_for("error", error=mssg))
+            return jsonify({"error", "Email not provided."}), 400
         if not re.match(pattern, email):
-            mssg = "Not a valid email."
-            return redirect(url_for("error", error=mssg))
+            return jsonify({"error", "Not a valid email."}), 400
         existing_emails = db.execute("SELECT email FROM users")
-        for existing_email in existing_emails:
-            if email == existing_email["email"]:
-                mssg = "Email already registered."
-                return redirect(url_for("error", error=mssg))
-
-        # error checking for username
-        username = request.form.get("username")
-        if not username:
-            mssg = "Username not provided."
-            return redirect(url_for("error", error=mssg))
-        existing_usernames = db.execute("SELECT username FROM users")
-        for existing_username in existing_usernames:
-            if username == existing_username["username"]:
-                mssg = "Username already registered."
-                return redirect(url_for("error", error=mssg))
+        if len(existing_emails) > 0:
+            return jsonify({"error", "Email already registered."}), 400
 
         # error checking for password
-        password = request.form.get("password")
+        password = data.get("password")
         if not password:
-            mssg = "Password missing."
-            return redirect(url_for("error", error=mssg))
+            return jsonify({"error", "Password missing."}), 400
 
         # error checking for confirmation
-        confirmation = request.form.get("confirmation")
+        confirmation = data.get("confirmation")
         if not confirmation:
-            mssg = "Confirmation missing."
-            return redirect(url_for("error", error=mssg))
+            return jsonify({"error", "Confirmation missing."}), 400
         if not confirmation == password:
-            mssg = "Confirmation does not match password."
-            return redirect(url_for("error", error=mssg))
+            return jsonify({"error", "Confirmation does not match password."}), 400
 
         # generate password hash
         password = generate_password_hash(password)
 
         db.execute(
-            """INSERT INTO users (username, password_hash, email, first_name, last_name, date_of_birth)
+            """INSERT INTO users (email, password_hash, first_name, last_name, date_of_birth)
                     VALUES (?, ?, ?, ?, ?, ?)""",
-            username,
-            password,
             email,
+            password,
             first_name,
             last_name,
             date_of_birth,
         )
 
-        return redirect("/login")
+        return jsonify({"message": "Registration successful!"})
+    else:
+        return jsonify("Content type is not supported."), 415
 
 
 @app.route("/logout")
 def logout():
-    """Log user out"""
+    """ Log user out """
 
     # Forget any user_id
     session.clear()
 
-    # Redirect user to login form
-    return redirect("/")
-
-
-@app.route("/error", methods=["GET"])
-def error():
-    error = request.args.get("error")
-    return render_template("error.html", error=error)
+    return jsonify({"message": "Logout successful!"})
