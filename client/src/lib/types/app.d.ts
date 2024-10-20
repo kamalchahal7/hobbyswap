@@ -32,6 +32,8 @@ export interface Listing {
 	title: string;
 	description: string;
 	condition: string;
+	lookingFor: string;
+	images: string;
 	datePosted: DateTime;
 	categories: Category[];
 	tags: Tag[];
@@ -44,7 +46,7 @@ export interface Comment {
 	text: string;
 	owner: User;
 	listing: Listing;
-	replyTo: Comment;
+	replyTo?: Comment;
 }
 
 export interface UserDto {

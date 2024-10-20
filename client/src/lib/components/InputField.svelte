@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input, Label } from 'flowbite-svelte';
 
-	export let required: boolean | null | undefined;
+	export let required: boolean | null | undefined = false;
 	export let id: string;
 	export let type:
 		| 'number'

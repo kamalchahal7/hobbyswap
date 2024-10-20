@@ -1,9 +1,7 @@
 <script lang="ts">
-	import axios from 'axios';
 	import { Button, A } from 'flowbite-svelte';
-	import { goto } from '$app/navigation';
 
-	import { type User, type LoginDto } from '$lib/types/app.d';
+	import { goto } from '$app/navigation';
 	import InputField from '$lib/components/InputField.svelte';
 	import { useUser } from '$lib/hooks/use-user';
 	import authService from '$lib/services/auth-service';
