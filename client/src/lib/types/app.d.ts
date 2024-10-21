@@ -15,6 +15,9 @@ export interface User {
 	email: string;
 	firstName: string;
 	lastName: string;
+	dateOfBirth?: DateTime;
+	listings?: Listing[];
+	comments?: Comment[];
 }
 
 export interface Tag {
@@ -23,21 +26,26 @@ export interface Tag {
 }
 
 export interface Category {
+	id?: number;
 	title: string;
 	tags?: Tag[];
 }
 
+export interface CategoryOption extends Category {
+	chosen: boolean;
+}
+
 export interface Listing {
-	id: number;
+	id?: number;
 	title: string;
 	description: string;
 	condition: string;
 	lookingFor: string;
-	images: string;
-	datePosted: DateTime;
+	// images: string;
+	datePosted: DateTime | null;
 	categories: Category[];
 	tags: Tag[];
-	owner: User;
+	owner: User | null;
 	comments: Comment[];
 }
 

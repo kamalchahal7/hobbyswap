@@ -13,6 +13,15 @@ async function login(data: LoginDto): Promise<User> {
 	return userData;
 }
 
+async function logout(): Promise<boolean> {
+	try {
+		await axios.post('http://localhost:5000/logout');
+		return true;
+	} catch {
+		return false;
+	}
+}
+
 export default {
 	signUp,
 	login

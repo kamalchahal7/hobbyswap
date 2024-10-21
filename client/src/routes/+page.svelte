@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, List, Li } from 'flowbite-svelte';
+	import { Button, Heading, List, Li } from 'flowbite-svelte';
 
 	import { type User } from '$lib/types/app.d';
 	import { useUser } from '$lib/hooks/use-user';
@@ -14,7 +14,7 @@
 </script>
 
 <div class="flex flex-col gap-6">
-	<h1 class="text-3xl">One hobbyist's junk is another's new love!</h1>
+	<Heading>One hobbyist's junk is another's new love!</Heading>
 	<p>
 		Whether you're in need of some new gear or are looking to make room in your closet after you
 		lost interest in a hobby, HobbySwap is the spot!
