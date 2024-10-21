@@ -1,12 +1,13 @@
 import { faker } from '@faker-js/faker';
 
 import { generateCategories } from '$lib/generators/category';
+import { generateComments } from '$lib/generators/comment';
 import { generateTags } from '$lib/generators/tag';
 import { generateUser } from '$lib/generators/user';
 import type { Listing } from '$lib/types';
 
 export function generateListing(): Listing {
-	return {
+	const newListing: Listing = {
 		title: faker.commerce.productName(),
 		condition: faker.lorem.sentence({
 			min: 10,
@@ -32,4 +33,8 @@ export function generateListing(): Listing {
 		owner: generateUser(),
 		comments: []
 	};
+
+	newListing.comments = generateComments({ min: 0, max: 3 }, newListing);
+
+	return newListing;
 }

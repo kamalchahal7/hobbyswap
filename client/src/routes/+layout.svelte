@@ -72,7 +72,6 @@
 		</NavUl>
 	</Navbar>
 	<div class="overflow-scroll py-16">
-		<!-- <div class="mt-16" /> -->
 		<div class="px-2 sm:px-6">
 			<slot />
 		</div>

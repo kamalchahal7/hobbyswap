@@ -50,11 +50,11 @@ export interface Listing {
 }
 
 export interface Comment {
-	id: number;
+	id?: number;
 	text: string;
 	owner: User;
 	listing: Listing;
-	replyTo?: Comment;
+	replyTo?: Comment | null | undefined;
 }
 
 export interface UserDto {

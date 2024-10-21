@@ -34,12 +34,12 @@
 			bind:value={listing.title}
 		/>
 		<div class="mb-6">
-			<Label for="textarea-id" class="mb-2">Description</Label>
+			<Label for="description-id" class="mb-2">Description</Label>
 			<Textarea
-				id="textarea-id"
+				id="description-id"
 				placeholder="Tell people a little bit more about the item."
 				rows={4}
-				name="message"
+				name="description"
 				bind:value={listing.description}
 			/>
 		</div>
