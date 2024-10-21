@@ -71,7 +71,7 @@
 			<NavLi href="/listings">Listings</NavLi>
 		</NavUl>
 	</Navbar>
-	<div class="overflow-scroll pb-16">
+	<div class="overflow-scroll py-16">
 		<!-- <div class="mt-16" /> -->
 		<div class="px-2 sm:px-6">
 			<slot />
