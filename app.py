@@ -442,12 +442,12 @@ def update_category(category_id):
 # deleting categories
 @app.route("/categories/<int:category_id>", methods=["DELETE"])
 def delete_category(category_id):
-    # Check if the category exists
+    # checks if the category exists
     category = db.execute("SELECT * FROM categories WHERE id = ?", category_id)
     if not category:
         return jsonify({"error": "Category not found"}), 404
 
-    # Delete the category
+    # deletes the category
     db.execute("DELETE FROM categories WHERE id = ?", category_id)
 
     return jsonify({"message": "Category deleted successfully!"}), 200
