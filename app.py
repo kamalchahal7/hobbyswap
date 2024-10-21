@@ -3,6 +3,7 @@ from cs50 import SQL
 from flask import Flask, request, session, jsonify
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+from db.init import create_or_init_sqlite_database
 from functions import login_required
 
 from datetime import datetime
@@ -21,6 +22,8 @@ CORS(app, supports_credentials=True)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
+create_or_init_sqlite_database("app.db")
 
 db = SQL("sqlite:///app.db")
 
@@ -170,16 +173,16 @@ def create_listing():
     # error checking for received data
     if not request.is_json:
         return jsonify({"error": "Content type is not supported."}), 415
-    
+
     # error checking for received json data
     data = request.get_json()
     if data is None:
         return jsonify({"error": "Invalid JSON"}), 400
-    
+
     # error checking if the required fields are present in the json data
     if 'title' not in data or 'description' not in data or 'owner' not in data:
         return jsonify({"error": "Required fields are missing"}), 400
-    
+
     # inserts the new listing into the listings table
     db.execute(
         "INSERT INTO listings (title, description, owner) VALUES (?, ?, ?)",
@@ -195,7 +198,7 @@ def create_listing():
 def get_listings():
 
     listings = db.execute("SELECT * FROM listings")
-    
+
     return jsonify(listings), 200
 
 # updating listings
@@ -250,7 +253,7 @@ def create_comment():
     # error checking for received data
     if not request.is_json:
         return jsonify({"error": "Content type is not supported."}), 415
-    
+
     # error checking for received json data
     data = request.get_json()
     if data is None:
@@ -259,7 +262,7 @@ def create_comment():
     # error checking if the fields are present in the JSON data
     if 'text' not in data or 'owner' not in data or 'listing' not in data:
         return jsonify({"error": "Required fields are missing"}), 400
-    
+
     # inserts the new comment into the comments table
     db.execute(
         "INSERT INTO comments (text, owner, listing, reply_to) VALUES (?, ?, ?, ?)",
@@ -268,7 +271,7 @@ def create_comment():
         data['listing'],
         data.get('reply_to')  # optional field, defaults to None if not provided
     )
-    
+
     return jsonify({"message": "Comment created successfully!"}), 201
 
 # fetching comments
@@ -283,7 +286,7 @@ def update_comment(comment_id):
     # error checking for received data
     if not request.is_json:
         return jsonify({"error": "Content type is not supported."}), 415
-    
+
     # error checking for received json data
     data = request.get_json()
     if data is None:
@@ -292,15 +295,15 @@ def update_comment(comment_id):
     # error checking if 'text' field is present in the JSON body
     if 'text' not in data:
         return jsonify({"error": "'text' field is missing"}), 400
-    
+
     # checks if the comment exists
     comment = db.execute("SELECT * FROM comments WHERE id = ?", comment_id)
     if not comment:
         return jsonify({"error": "Comment not found"}), 404
-    
+
     # updates the comment's text
     db.execute("UPDATE comments SET text = ? WHERE id = ?", data['text'], comment_id)
-    
+
     return jsonify({"message": "Comment updated successfully!"}), 200
 
 # deleting comments
@@ -310,10 +313,10 @@ def delete_comment(comment_id):
     comment = db.execute("SELECT * FROM comments WHERE id = ?", comment_id)
     if not comment:
         return jsonify({"error": "Comment not found"}), 404
-    
+
     # deletes the comment
     db.execute("DELETE FROM comments WHERE id = ?", comment_id)
-    
+
     return jsonify({"message": "Comment deleted successfully!"}), 200
 
 # CRUD TAGS ROUTE
@@ -324,7 +327,7 @@ def create_tag():
     # error checking for received data
     if not request.is_json:
         return jsonify({"error": "Content type is not supported."}), 415
-    
+
     # error checking for received json data
     data = request.get_json()
     if data is None:
@@ -351,7 +354,7 @@ def update_tag(tag_id):
     # error checking for received data
     if not request.is_json:
         return jsonify({"error": "Content type is not supported."}), 415
-    
+
     # error checking for received json data
     data = request.get_json()
     if data is None:
@@ -392,7 +395,7 @@ def create_category():
     # error checking for received data
     if not request.is_json:
         return jsonify({"error": "Content type is not supported."}), 415
-    
+
     # error checking for received json data
     data = request.get_json()
     if data is None:
@@ -419,7 +422,7 @@ def update_category(category_id):
     # error checking for received data
     if not request.is_json:
         return jsonify({"error": "Content type is not supported."}), 415
-    
+
     # error checking for received json data
     data = request.get_json()
     if data is None:
