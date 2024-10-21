@@ -4,7 +4,6 @@ from flask import Flask, request, session, jsonify
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from functions import login_required
-from db.init import create_or_init_sqlite_database
 
 from datetime import datetime
 import pytz
@@ -23,9 +22,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-create_or_init_sqlite_database("app.db")
 db = SQL("sqlite:///app.db")
-
 
 @app.after_request
 def after_request(response):
@@ -164,3 +161,293 @@ def logout():
     session.clear()
 
     return jsonify({"message": "Logout successful!"})
+
+# CRUD LISTINGS ROUTE
+
+# creating listings
+@app.route("/listings", methods=["GET", "POST"])
+def create_listing():
+    # error checking for received data
+    if not request.is_json:
+        return jsonify({"error": "Content type is not supported."}), 415
+    
+    # error checking for received json data
+    data = request.get_json()
+    if data is None:
+        return jsonify({"error": "Invalid JSON"}), 400
+    
+    # error checking if the required fields are present in the json data
+    if 'title' not in data or 'description' not in data or 'owner' not in data:
+        return jsonify({"error": "Required fields are missing"}), 400
+    
+    # inserts the new listing into the listings table
+    db.execute(
+        "INSERT INTO listings (title, description, owner) VALUES (?, ?, ?)",
+        data['title'],
+        data['description'],
+        data['owner']
+    )
+
+    return jsonify({"message": "Listing created successfully!"})
+
+# fetching listings
+@app.route("/listings", methods=["GET"])
+def get_listings():
+
+    listings = db.execute("SELECT * FROM listings")
+    
+    return jsonify(listings), 200
+
+# updating listings
+@app.route("/listings/<int:listing_id>", methods=["PUT"])
+def update_listing(listing_id):
+    # error checking for received data
+    if not request.is_json:
+        return jsonify({"error": "Content type is not supported."}), 415
+
+    # error checking for received json data
+    data = request.get_json()
+    if data is None:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    # error checking if 'title' and 'descriptions' fields are present in the json data
+    if 'title' not in data or 'description' not in data:
+        return jsonify({"error": "Title and description fields are required"}), 400
+
+    # checks if the listing exists
+    listing = db.execute("SELECT * FROM listings WHERE id = ?", listing_id)
+    if not listing:
+        return jsonify({"error": "Listing not found"}), 404
+
+    # update the listing's title and description
+    db.execute(
+        "UPDATE listings SET title = ?, description = ? WHERE id = ?",
+        data['title'],
+        data['description'],
+        listing_id
+    )
+
+    return jsonify({"message": "Listing updated successfully!"}), 200
+
+# deleting listings
+@app.route("/listings/<int:listing_id>", methods=["DELETE"])
+def delete_listing(listing_id):
+    # checks if the listing exists
+    listing = db.execute("SELECT * FROM listings WHERE id = ?", listing_id)
+    if not listing:
+        return jsonify({"error": "Listing not found"}), 404
+
+    # deletes the listing
+    db.execute("DELETE FROM listings WHERE id = ?", listing_id)
+
+    return jsonify({"message": "Listing deleted successfully!"}), 200
+
+# CRUD COMMENTS ROUTE
+
+# creating new comments
+@app.route("/comments", methods=["POST"])
+def create_comment():
+    # error checking for received data
+    if not request.is_json:
+        return jsonify({"error": "Content type is not supported."}), 415
+    
+    # error checking for received json data
+    data = request.get_json()
+    if data is None:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    # error checking if the fields are present in the JSON data
+    if 'text' not in data or 'owner' not in data or 'listing' not in data:
+        return jsonify({"error": "Required fields are missing"}), 400
+    
+    # inserts the new comment into the comments table
+    db.execute(
+        "INSERT INTO comments (text, owner, listing, reply_to) VALUES (?, ?, ?, ?)",
+        data['text'],
+        data['owner'],
+        data['listing'],
+        data.get('reply_to')  # optional field, defaults to None if not provided
+    )
+    
+    return jsonify({"message": "Comment created successfully!"}), 201
+
+# fetching comments
+@app.route('/comments/<int:listing_id>', methods=['GET'])
+def get_comments(listing_id):
+    comments = db.execute("SELECT * FROM comments WHERE listing = ?", listing_id)
+    return jsonify(comments), 200
+
+# updating comments
+@app.route("/comments/<int:comment_id>", methods=["PUT"])
+def update_comment(comment_id):
+    # error checking for received data
+    if not request.is_json:
+        return jsonify({"error": "Content type is not supported."}), 415
+    
+    # error checking for received json data
+    data = request.get_json()
+    if data is None:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    # error checking if 'text' field is present in the JSON body
+    if 'text' not in data:
+        return jsonify({"error": "'text' field is missing"}), 400
+    
+    # checks if the comment exists
+    comment = db.execute("SELECT * FROM comments WHERE id = ?", comment_id)
+    if not comment:
+        return jsonify({"error": "Comment not found"}), 404
+    
+    # updates the comment's text
+    db.execute("UPDATE comments SET text = ? WHERE id = ?", data['text'], comment_id)
+    
+    return jsonify({"message": "Comment updated successfully!"}), 200
+
+# deleting comments
+@app.route("/comments/<int:comment_id>", methods=["DELETE"])
+def delete_comment(comment_id):
+    # checks if the comment exists
+    comment = db.execute("SELECT * FROM comments WHERE id = ?", comment_id)
+    if not comment:
+        return jsonify({"error": "Comment not found"}), 404
+    
+    # deletes the comment
+    db.execute("DELETE FROM comments WHERE id = ?", comment_id)
+    
+    return jsonify({"message": "Comment deleted successfully!"}), 200
+
+# CRUD TAGS ROUTE
+
+# creating tags
+@app.route("/tags", methods=["POST"])
+def create_tag():
+    # error checking for received data
+    if not request.is_json:
+        return jsonify({"error": "Content type is not supported."}), 415
+    
+    # error checking for received json data
+    data = request.get_json()
+    if data is None:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    # error checking if the 'value' field is present
+    if 'value' not in data:
+        return jsonify({"error": "'value' field is required"}), 400
+
+    # inserts the new tag into the tags table
+    db.execute("INSERT INTO tags (value) VALUES (?)", data['value'])
+
+    return jsonify({"message": "Tag created successfully!"}), 201
+
+# fetching tags
+@app.route("/tags", methods=["GET"])
+def get_tags():
+    tags = db.execute("SELECT * FROM tags")
+    return jsonify(tags), 200
+
+# updating tags
+@app.route("/tags/<int:tag_id>", methods=["PUT"])
+def update_tag(tag_id):
+    # error checking for received data
+    if not request.is_json:
+        return jsonify({"error": "Content type is not supported."}), 415
+    
+    # error checking for received json data
+    data = request.get_json()
+    if data is None:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    # error checking if 'value' field is present
+    if 'value' not in data:
+        return jsonify({"error": "'value' field is required"}), 400
+
+    # checks if the tag exists
+    tag = db.execute("SELECT * FROM tags WHERE id = ?", tag_id)
+    if not tag:
+        return jsonify({"value": "Tag not found"}), 404
+
+    # updates the tag's value
+    db.execute("UPDATE tags SET value = ? WHERE id = ?", data['value'], tag_id)
+
+    return jsonify({"message": "Tag updated successfully!"}), 200
+
+# deleting tags
+@app.route("/tags/<int:tag_id>", methods=["DELETE"])
+def delete_tag(tag_id):
+    # checks if the tag exists
+    tag = db.execute("SELECT * FROM tags WHERE id = ?", tag_id)
+    if not tag:
+        return jsonify({"error": "Tag not found"}), 404
+
+    # deletes the tag
+    db.execute("DELETE FROM tags WHERE id = ?", tag_id)
+
+    return jsonify({"message": "Tag deleted successfully!"}), 200
+
+# CRUD CATEGORIES ROUTE
+
+# creating categories
+@app.route("/categories", methods=["POST"])
+def create_category():
+    # error checking for received data
+    if not request.is_json:
+        return jsonify({"error": "Content type is not supported."}), 415
+    
+    # error checking for received json data
+    data = request.get_json()
+    if data is None:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    # error checking if the 'title' field is present
+    if 'title' not in data:
+        return jsonify({"error": "'title' field is required"}), 400
+
+    # inserts the new category into the categories table
+    db.execute("INSERT INTO categories (title) VALUES (?)", data['title'])
+
+    return jsonify({"message": "Category created successfully!"}), 201
+
+# fetching categories
+@app.route("/categories", methods=["GET"])
+def get_categories():
+    categories = db.execute("SELECT * FROM categories")
+    return jsonify(categories), 200
+
+# updating categories
+@app.route("/categories/<int:category_id>", methods=["PUT"])
+def update_category(category_id):
+    # error checking for received data
+    if not request.is_json:
+        return jsonify({"error": "Content type is not supported."}), 415
+    
+    # error checking for received json data
+    data = request.get_json()
+    if data is None:
+        return jsonify({"error": "Invalid JSON"}), 400
+
+    # error checking if 'title' field is present
+    if 'title' not in data:
+        return jsonify({"error": "'title' field is required"}), 400
+
+    # checks if the category exists
+    category = db.execute("SELECT * FROM categories WHERE id = ?", category_id)
+    if not category:
+        return jsonify({"error": "Category not found"}), 404
+
+    # update the category's title
+    db.execute("UPDATE categories SET title = ? WHERE id = ?", data['title'], category_id)
+
+    return jsonify({"message": "Category updated successfully!"}), 200
+
+# deleting categories
+@app.route("/categories/<int:category_id>", methods=["DELETE"])
+def delete_category(category_id):
+    # Check if the category exists
+    category = db.execute("SELECT * FROM categories WHERE id = ?", category_id)
+    if not category:
+        return jsonify({"error": "Category not found"}), 404
+
+    # Delete the category
+    db.execute("DELETE FROM categories WHERE id = ?", category_id)
+
+    return jsonify({"message": "Category deleted successfully!"}), 200
