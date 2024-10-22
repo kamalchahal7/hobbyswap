@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	import { goto } from '$app/navigation';
 	import { Avatar, Button, Badge, Heading, P, Img, Gallery } from 'flowbite-svelte';
 	import { faker } from '@faker-js/faker';
@@ -12,6 +14,14 @@
 
 	let listing: Listing = generateListing();
 
+	import type { PageData } from './$types';
+
+	export let data: PageData;
+
+	// if (data.listing) {
+	// 	listing = data.listing;
+	// }
+
 	let featuredImage = {
 		alt: listing.title,
 		src: 'https://picsum.photos/1280/720'
@@ -22,6 +32,8 @@
 		.map((_, index) => {
 			return { alt: listing.title, src: `https://picsum.photos/1280/720?random=${index}` };
 		});
+
+	onMount(() => {});
 
 	const messageReceiver = useMessageReceiver();
 </script>

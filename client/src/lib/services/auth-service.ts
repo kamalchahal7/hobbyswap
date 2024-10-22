@@ -28,8 +28,25 @@ async function logout(): Promise<boolean> {
 	}
 }
 
+async function authCheck(): Promise<User | null> {
+	try {
+		const response = await axios.get('http://localhost:5000/auth-check');
+		const loginResponse: LoginResponse = response.data;
+		const userData: User = {
+			...loginResponse,
+			id: parseInt(loginResponse.user_id),
+			firstName: loginResponse.first_name,
+			lastName: loginResponse.last_name
+		};
+		return userData;
+	} catch {
+		return null;
+	}
+}
+
 export default {
 	signUp,
 	login,
-	logout
+	logout,
+	authCheck
 };

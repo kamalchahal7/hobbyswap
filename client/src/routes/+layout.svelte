@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import '../app.css';
 	import { faker } from '@faker-js/faker';
 	import {
@@ -14,13 +14,22 @@
 		DropdownHeader,
 		DropdownDivider
 	} from 'flowbite-svelte';
+	import { onMount } from 'svelte';
 
 	import { page } from '$app/stores';
 	import { useUser } from '$lib/hooks/use-user';
 	import { useMessageReceiver } from '$lib/hooks/use-message-receiver';
+	import authService from '$lib/services/auth-service';
 
 	const user = useUser();
 	useMessageReceiver();
+
+	onMount(async () => {
+		const authCheck = await authService.authCheck();
+		if (authCheck) {
+			$user = authCheck;
+		}
+	});
 
 	$: activeUrl = $page.url.pathname;
 </script>

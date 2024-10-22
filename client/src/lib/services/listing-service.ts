@@ -25,9 +25,22 @@ async function createListing(listingData: Listing): Promise<Listing> {
 }
 
 async function getListing(listingId: number): Promise<Listing> {
-	const response = await axios.get(`http://localhost:5000/listings/${listingId}`);
-	const listing: Listing = response.data;
-	return listing;
+	try {
+		const response = await axios.get(`http://localhost:5000/listings/${listingId}`);
+		const listing: Listing = response.data;
+		return listing;
+	} catch (err) {
+		if (!axios.isAxiosError(err)) {
+			throw err;
+		}
+		if (err.status === 401) {
+			throw ApiError.UNAUTHORIZED;
+		} else if (err.status === 404) {
+			throw ApiError.NOT_FOUND;
+		} else {
+			throw err;
+		}
+	}
 }
 
 export default {

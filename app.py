@@ -155,8 +155,28 @@ def register():
 
     return jsonify({"message": "Registration successful!"})
 
+@app.route("/auth-check")
+@login_required
+def auth_check():
+    account = db.execute(
+        "SELECT * FROM users WHERE id = ?",
+        session["user_id"],
+    )
+    if len(account) != 1:
+        return jsonify({"error": "Please log in."}), 401
+
+    return jsonify(
+        {
+            "user_id": session["user_id"],
+            "first_name": account[0]["first_name"],
+            "last_name": account[0]["last_name"],
+            "email": account[0]["email"],
+        }
+    )
+    return jsonify(), 204
 
 @app.route("/logout")
+@login_required
 def logout():
     """Log user out"""
 

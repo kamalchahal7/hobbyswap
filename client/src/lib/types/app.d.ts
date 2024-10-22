@@ -5,7 +5,9 @@ declare global {
 	namespace App {
 		// interface Error {}
 		// interface Locals {}
-		// interface PageData {}
+		interface PageData {
+			listing: Listing | null | undefined;
+		}
 		// interface PageState {}
 		// interface Platform {}
 	}
@@ -96,7 +98,8 @@ export interface ListingDto extends Listing {
 }
 
 export enum ApiError {
-	UNAUTHORIZED = 'Unauthorized'
+	UNAUTHORIZED = 'Unauthorized',
+	NOT_FOUND = 'Not Found'
 }
 
 export {};
