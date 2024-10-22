@@ -20,7 +20,7 @@
 			});
 			registered = true;
 			setTimeout(() => {
-				goto('/login');
+				goto('/auth/login');
 			}, 1000);
 		} catch (err) {
 			console.error(err);

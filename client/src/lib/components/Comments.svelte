@@ -18,12 +18,12 @@
 
 <div class="flex flex-col gap-6">
 	<Heading tag="h3">Comments</Heading>
-	<div>
-		<Label for="newcomment-id" class="mb-2">Add a comment</Label>
+	<div class="flex flex-col gap-2">
+		<Label for="newcomment-id">Add a comment</Label>
 		<Textarea id="newcomment-id" bind:value={newComment.text}></Textarea>
+		<Button class="w-fit">Comment</Button>
 	</div>
 	{#each listing.comments as comment}
 		<CommentCard {comment} />
 	{/each}
-	<Button class="w-fit">Comment</Button>
 </div>

@@ -2,7 +2,7 @@ import os
 
 from flask_cors import CORS
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, flash, redirect, jsonify, render_template, request, session, url_for
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
@@ -20,7 +20,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
-            return redirect("/login")
+            return jsonify({"error": "Please log in and try again"}), 401
         return f(*args, **kwargs)
 
     return decorated_function

@@ -168,7 +168,8 @@ def logout():
 # CRUD LISTINGS ROUTE
 
 # creating listings
-@app.route("/listings", methods=["GET", "POST"])
+@app.route("/listings", methods=["POST"])
+@login_required
 def create_listing():
     # error checking for received data
     if not request.is_json:
@@ -180,29 +181,47 @@ def create_listing():
         return jsonify({"error": "Invalid JSON"}), 400
 
     # error checking if the required fields are present in the json data
-    if 'title' not in data or 'description' not in data or 'owner' not in data:
+    if 'title' not in data or 'description' not in data or 'condition' not in data or 'looking_for' not in data:
         return jsonify({"error": "Required fields are missing"}), 400
 
     # inserts the new listing into the listings table
     db.execute(
-        "INSERT INTO listings (title, description, owner) VALUES (?, ?, ?)",
+        "INSERT INTO listings (title, description, owner, condition, looking_for) VALUES (?, ?, ?, ?, ?)",
         data['title'],
         data['description'],
-        data['owner']
+        session["user_id"],
+        data['condition'],
+        data['looking_for']
     )
 
-    return jsonify({"message": "Listing created successfully!"})
+    try:
+        listing = db.execute("SELECT * FROM listings WHERE owner = ? AND title = ? ORDER BY date_posted DESC", session["user_id"], data['title'])[0]
+        return jsonify(listing), 201
+    except IndexError:
+        return jsonify({"error": "We ran into an unknown error when saving your listing."}), 500
+
 
 # fetching listings
 @app.route("/listings", methods=["GET"])
+@login_required
 def get_listings():
-
     listings = db.execute("SELECT * FROM listings")
 
     return jsonify(listings), 200
 
+# fetching a single listing
+@app.route("/listings/<int:listing_id>", methods=["GET"])
+@login_required
+def get_listing(listing_id):
+    listing = db.execute("SELECT * FROM listings WHERE id = ?", listing_id)
+    if not listing:
+        return jsonify({"error": "Listing not found"}), 404
+
+    return jsonify(listing), 200
+
 # updating listings
 @app.route("/listings/<int:listing_id>", methods=["PUT"])
+@login_required
 def update_listing(listing_id):
     # error checking for received data
     if not request.is_json:
@@ -234,6 +253,7 @@ def update_listing(listing_id):
 
 # deleting listings
 @app.route("/listings/<int:listing_id>", methods=["DELETE"])
+@login_required
 def delete_listing(listing_id):
     # checks if the listing exists
     listing = db.execute("SELECT * FROM listings WHERE id = ?", listing_id)
@@ -248,8 +268,9 @@ def delete_listing(listing_id):
 # CRUD COMMENTS ROUTE
 
 # creating new comments
-@app.route("/comments", methods=["POST"])
-def create_comment():
+@app.route("/listings/<int:listing_id>/comments", methods=["POST"])
+@login_required
+def create_comment(listing_id):
     # error checking for received data
     if not request.is_json:
         return jsonify({"error": "Content type is not supported."}), 415
@@ -260,7 +281,7 @@ def create_comment():
         return jsonify({"error": "Invalid JSON"}), 400
 
     # error checking if the fields are present in the JSON data
-    if 'text' not in data or 'owner' not in data or 'listing' not in data:
+    if 'text' not in data or 'owner' not in data:
         return jsonify({"error": "Required fields are missing"}), 400
 
     # inserts the new comment into the comments table
@@ -268,14 +289,15 @@ def create_comment():
         "INSERT INTO comments (text, owner, listing, reply_to) VALUES (?, ?, ?, ?)",
         data['text'],
         data['owner'],
-        data['listing'],
+        listing_id,
         data.get('reply_to')  # optional field, defaults to None if not provided
     )
 
     return jsonify({"message": "Comment created successfully!"}), 201
 
 # fetching comments
-@app.route('/comments/<int:listing_id>', methods=['GET'])
+@app.route('/listings/<int:listing_id>/comments', methods=['GET'])
+@login_required
 def get_comments(listing_id):
     comments = db.execute("SELECT * FROM comments WHERE listing = ?", listing_id)
     return jsonify(comments), 200

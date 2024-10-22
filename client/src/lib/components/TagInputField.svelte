@@ -1,17 +1,14 @@
 <script lang="ts">
 	import { Search, Label, Badge, Listgroup } from 'flowbite-svelte';
 	import { CloseOutline } from 'flowbite-svelte-icons';
-	import type { Tag, Listing } from '$lib/types/app.d';
+
+	import type { Tag, Listing } from '$lib/types';
+	import { generateTags } from '$lib/generators/tag';
 
 	export let listing: Listing;
 
 	let searchTerm = '';
-	let availableTags: Tag[] = [
-		{ value: 'Electronics' },
-		{ value: 'Books' },
-		{ value: 'Clothing' }
-		// Add more predefined tags as needed
-	];
+	let availableTags: Tag[] = generateTags(10);
 
 	function addTag(tag: Tag) {
 		if (!listing.tags.some((t: Tag) => t.value === tag.value)) {

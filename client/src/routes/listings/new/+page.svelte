@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { Button, Heading, Img, Label, Textarea } from 'flowbite-svelte';
 
-	// import type { Listing, Tag, Category } from '$lib/types/app.d';
+	import listingService from '$lib/services/listing-service';
 	import InputField from '$lib/components/InputField.svelte';
 	import TagInputField from '$lib/components/TagInputField.svelte';
 	import CategoryInputField from '$lib/components/CategoryInputField.svelte';
-	import type { Listing } from '$lib/types/app.d';
+	import { ApiError, type Listing } from '$lib/types/app.d';
+	import { goto } from '$app/navigation';
 
 	let listing: Listing = {
 		title: '',
@@ -18,13 +19,26 @@
 		owner: null,
 		comments: []
 	};
+
+	async function handleCreateListing() {
+		try {
+			const response = await listingService.createListing(listing);
+
+			goto(`/listings/${response.id}`);
+		} catch (err) {
+			if (err == ApiError.UNAUTHORIZED) {
+				goto('/auth/login');
+			}
+			console.error(err);
+		}
+	}
 </script>
 
 <Heading class="mb-8">Create New Listing</Heading>
 
-<form class="grid md:grid-cols-2 gap-x-6">
-	<div class="mb-6 flex justify-center">
-		<Img src="https://picsum.photos/1280/720" class="row-span-7" alt="sample 1" />
+<form class="grid md:grid-cols-2 gap-x-6" on:submit|preventDefault={handleCreateListing}>
+	<div class="mb-6 flex justify-center row-span-7">
+		<div><Img src="https://picsum.photos/1280/720" alt="sample 1" /></div>
 	</div>
 	<div>
 		<InputField
@@ -57,6 +71,6 @@
 		/>
 		<TagInputField {listing} />
 		<CategoryInputField {listing} />
-		<Button>Create!</Button>
+		<Button type="submit">Create!</Button>
 	</div>
 </form>

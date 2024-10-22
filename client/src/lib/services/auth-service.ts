@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { LoginDto, SignupDto, User } from '$lib/types/app.d';
+import type { LoginDto, LoginResponse, SignupDto, User } from '$lib/types';
 
 axios.defaults.withCredentials = true;
 
@@ -9,7 +9,13 @@ async function signUp(data: SignupDto) {
 
 async function login(data: LoginDto): Promise<User> {
 	const response = await axios.post('http://localhost:5000/login', data);
-	const userData: User = response.data;
+	const loginResponse: LoginResponse = response.data;
+	const userData: User = {
+		...loginResponse,
+		id: parseInt(loginResponse.user_id),
+		firstName: loginResponse.first_name,
+		lastName: loginResponse.last_name
+	};
 	return userData;
 }
 
@@ -24,5 +30,6 @@ async function logout(): Promise<boolean> {
 
 export default {
 	signUp,
-	login
+	login,
+	logout
 };

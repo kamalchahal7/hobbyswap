@@ -8,6 +8,7 @@ import type { Listing } from '$lib/types';
 
 export function generateListing(): Listing {
 	const newListing: Listing = {
+		id: faker.number.int({ min: 0 }),
 		title: faker.commerce.productName(),
 		condition: faker.lorem.sentence({
 			min: 10,
@@ -37,4 +38,10 @@ export function generateListing(): Listing {
 	newListing.comments = generateComments({ min: 0, max: 3 }, newListing);
 
 	return newListing;
+}
+
+export function generateListings(count: number | { min: number; max: number }): Listing[] {
+	const length = faker.helpers.rangeToNumber(count);
+
+	return Array(length).fill(0).map(generateListing);
 }

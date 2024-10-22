@@ -1,15 +1,12 @@
 <script lang="ts">
 	import { Checkbox, Label } from 'flowbite-svelte';
-	import type { CategoryOption, Listing } from '$lib/types/app.d';
+
+	import { generateCategories } from '$lib/generators/category';
+	import type { CategoryOption, Listing } from '$lib/types';
 
 	export let listing: Listing;
 
-	let availableCategories: CategoryOption[] = [
-		{ id: 1, title: 'Electronics' },
-		{ id: 2, title: 'Books' },
-		{ id: 3, title: 'Clothing' }
-		// Add more predefined tags as needed
-	]
+	let availableCategories: CategoryOption[] = generateCategories(10)
 		.map((category) => ({ ...category, chosen: false }))
 		.sort((a: CategoryOption, b: CategoryOption) => {
 			return a.title.localeCompare(b.title);
@@ -27,7 +24,7 @@
 
 <div class="mb-6">
 	<Label class="mb-2">Categories</Label>
-	<div class="flex gap-2">
+	<div class="flex flex-wrap gap-2">
 		{#each availableCategories as category, i}
 			<Checkbox
 				on:click={() => {

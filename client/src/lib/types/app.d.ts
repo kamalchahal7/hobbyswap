@@ -12,6 +12,7 @@ declare global {
 }
 
 export interface User {
+	id: number;
 	email: string;
 	firstName: string;
 	lastName: string;
@@ -57,6 +58,14 @@ export interface Comment {
 	replyTo?: Comment | null | undefined;
 }
 
+export interface Message {
+	id?: number;
+	text: string;
+	sender: User;
+	receiver: User;
+	sent?: DateTime;
+}
+
 export interface UserDto {
 	email: string;
 	first_name: string;
@@ -79,6 +88,15 @@ export interface LoginResponse {
 	first_name: string;
 	last_name: string;
 	email: string;
+}
+
+export interface ListingDto extends Listing {
+	looking_for: string;
+	lookingFor: undefined;
+}
+
+export enum ApiError {
+	UNAUTHORIZED = 'Unauthorized'
 }
 
 export {};
